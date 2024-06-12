@@ -91,39 +91,6 @@ int Chess::judge() {
     return NO_MAN;
 }
 
-// 深度优先搜索实现裁决函数
-int Chess::judge_dfs()
-{
-    int x, y;
-    int result[4] = {1, 1, 1, 1};
-    y = this->place_index_last % this->length;
-    x = (this->place_index_last - y) / this->length;
-    int way[3] = { -1, 0, 1 };
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (i == 1 and j == 1) continue;
-            for ( int k = 1; k < this->method; k++) {
-                if (this->check(x + way[i]*k, y + way[j]*k) != CROSS_BOUND and this->check(x + way[i] * k, y + way[j] * k) == this->who_place_next) {
-                    if (way[i] == 0) result[0]++;
-                    else if (way[i] == -way[j]) result[1]++;
-                    else if (way[j] == 0) result[2]++;
-                    else if (way[i] == way[j]) result[3]++;
-                }
-                else break;
-            }
-        }
-    }
-    for (int i = 0; i < 4; i++) {
-        if (result[i] >= 5) {
-            this->winner = this->who_place_next;
-            return this->who_place_next;
-        }
-    }
-    return NO_MAN;
-}
-
-
-
 // 以下展示函数已废除
 /*
 void Chess::show_mat() const {

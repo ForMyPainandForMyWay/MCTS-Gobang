@@ -17,7 +17,6 @@ public:
     bool put(int x, int y);
     int check(int x, int y) const;
     int judge();
-    int judge_dfs();
     //void show_mat() const;
 };
 
