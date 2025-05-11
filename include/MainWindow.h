@@ -5,7 +5,8 @@
 #define PVP 0
 #define PVE 1
 
-class MAINWINDOW : public QWidget{
+class MAINWINDOW : public QWidget
+{
 	Q_OBJECT
 
 public:
@@ -15,7 +16,7 @@ public:
     bool AIisThinking;  // 正在搜索
     int game_mode = PVP;  // 游戏模式
     explicit MAINWINDOW(Game* game, QWidget* parent = nullptr);
-    ~MAINWINDOW();
+    ~MAINWINDOW() override;
     void show_who_put();  // 展示该谁落子
     void show_who_win();  // 展示谁赢了
     void end_game();  // 结束游戏

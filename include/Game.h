@@ -1,18 +1,17 @@
 #ifndef GAME_H
 #define GAME_H
+
 #define AI 1
 #define HUMAN 0
-//#include <stack>
-#include "stack.h"
-#include <deque>
 #include "Chess.h"
+#include "stack.h"
+
 
 class Game {
 public:
     Chess *chess = nullptr;
     int Player_0 = HUMAN;
     int Player_1 = AI;
-    //std::deque<int> step;  // 存储走过的区域的栈
     Stack_M<int> step;
     Game();
     ~Game();

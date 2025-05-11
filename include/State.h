@@ -1,5 +1,7 @@
-﻿#ifndef STATE_H
+#ifndef STATE_H
 #define STATE_H
+
+
 #include "Chess.h"
 class State {
 public:

@@ -1,5 +1,5 @@
 #include "Node.h"
-#include "roll.cuh"
+//#include "roll.cuh"
 #include <ctime>
 #include <iostream>
 #include <thread>
@@ -9,8 +9,8 @@
 #define PARTLY 4
 #define ALL_NOT 5
 #define ROLLTIMES 1024
-void roll_and_update_GPU(Node* root, int roll_times);
-void roll_GPUthread(Node* child, const int roll_times);
+//void roll_and_update_GPU(Node* root, int roll_times);
+//void roll_GPUthread(Node* child, const int roll_times);
 using namespace std;
 recursive_mutex mut;
 
@@ -196,7 +196,7 @@ int MCTS_search(Chess* root_chess, const float time_limit) {
     // 初始化状态根结点，并初次拓展与模拟，设置一个用于查找的temp指针
     auto root = Node(new State(root_chess));
     root.expand();
-    roll_and_update_GPU(&root, ROLLTIMES);
+    roll_and_update(&root, ROLLTIMES);
     //for(const auto & i : root.child) {
     //    rollout(i, find_place(i), 104);
     //}
@@ -221,7 +221,7 @@ int MCTS_search(Chess* root_chess, const float time_limit) {
             temp = _;
         }
         temp->expand();
-        roll_and_update_GPU(temp, ROLLTIMES);
+        roll_and_update(temp, ROLLTIMES);
         //roll_and_update(temp, ROLLTIMES);
 
         // 废弃的单线程实现
@@ -265,30 +265,30 @@ void roll_and_update(Node* root,int roll_times) {
 };
 
 // 以下为GPU版本的函数
-void roll_GPUthread(Node* child, const int roll_times) {
-    std::vector<int>* place = find_place(child);
-    int place_eles = int(place->size());
-    int* place_arr = new int[place->size()];
-    std::copy(place->begin(), place->end(), place_arr);
-    delete place;
-
-    rollout_GPU(child, child->state->chess->length, place_arr, place_eles, roll_times);
-}
-
-
-void roll_and_update_GPU(Node* root, int roll_times) {
-    std::vector<std::thread> pool;
-    for (int i = 0; i < root->child.size(); i++) {
-        pool.push_back(std::thread(roll_GPUthread, root->child[i], roll_times));
-    }
-    for (int i = 0; i < root->child.size(); i++) {
-        pool[i].join();
-    }
-
-    for (int i = 0; i < root->child.size(); i++) {
-        pool[i] = std::thread(UCB_thread, root->child[i]);
-    }
-    for (int i = 0; i < root->child.size(); i++) {
-        pool[i].join();
-    }
-};
+//void roll_GPUthread(Node* child, const int roll_times) {
+//    std::vector<int>* place = find_place(child);
+//    int place_eles = int(place->size());
+//    int* place_arr = new int[place->size()];
+//    std::copy(place->begin(), place->end(), place_arr);
+//    delete place;
+//
+//    rollout_GPU(child, child->state->chess->length, place_arr, place_eles, roll_times);
+//}
+//
+//
+//void roll_and_update_GPU(Node* root, int roll_times) {
+//    std::vector<std::thread> pool;
+//    for (int i = 0; i < root->child.size(); i++) {
+//        pool.push_back(std::thread(roll_GPUthread, root->child[i], roll_times));
+//    }
+//    for (int i = 0; i < root->child.size(); i++) {
+//        pool[i].join();
+//    }
+//
+//    for (int i = 0; i < root->child.size(); i++) {
+//        pool[i] = std::thread(UCB_thread, root->child[i]);
+//    }
+//    for (int i = 0; i < root->child.size(); i++) {
+//        pool[i].join();
+//    }
+//};

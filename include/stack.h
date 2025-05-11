@@ -1,5 +1,5 @@
-﻿#pragma once
-//#include <iostream>  
+#ifndef STACK_H
+#define STACK_H
 
 // 链栈结点的实现
 template <typename T>
@@ -120,3 +120,5 @@ private:
         this->size_ = 0;
     }
 };
+
+#endif  // STACK_H
