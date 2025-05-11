@@ -1,14 +1,14 @@
-﻿#ifndef MAINWINDOW_CPP
+﻿#include <iostream>
+#ifndef MAINWINDOW_CPP
 #define MAINWINDOW_CPP
 
-#include <QMessageBox>  
-#include "ui_Widget.h"
-#include "MainWindow.h"
-#include <QPainter>
+// #include <QMessageBox>
+#include "../cmake-build-debug/Gomoku_autogen/include/ui_Widget.h"
+#include "../include/MainWindow.h"
+// #include <QPainter>
 #include <QtWidgets/QWidget>
-#include <Qobject>
+// #include <QObject>
 #include <QMessageBox>
-#include <iostream>
 #define PVP 0
 #define PVE 1
 
@@ -30,11 +30,10 @@ MAINWINDOW::MAINWINDOW(Game *game, QWidget* parent):
     this->ui->reset_game->setEnabled(false);
     this->ui->who_put_show->setText(QString());
     
-
-    QObject::connect(ui->start_game, &QPushButton::clicked, this, &MAINWINDOW::start_game);
-    QObject::connect(ui->reset_game, &QPushButton::clicked, this, &MAINWINDOW::reset_game);
-    QObject::connect(ui->reput, &QPushButton::clicked, this, &MAINWINDOW::reput);
-    QObject::connect(ui->game_mode, &QComboBox::currentTextChanged, this, &MAINWINDOW::reset_game_mode);
+    connect(ui->start_game, &QPushButton::clicked, this, &MAINWINDOW::start_game);
+    connect(ui->reset_game, &QPushButton::clicked, this, &MAINWINDOW::reset_game);
+    connect(ui->reput, &QPushButton::clicked, this, &MAINWINDOW::reput);
+    connect(ui->game_mode, &QComboBox::currentTextChanged, this, &MAINWINDOW::reset_game_mode);
 }
 
 MAINWINDOW::~MAINWINDOW(){
@@ -92,7 +91,7 @@ void MAINWINDOW::reset_game() {
 // 悔棋
 void MAINWINDOW::reput() {
     if (this->game->step.size() != 0) {
-        this->game->est(this->game_mode + 1);
+        this->game->rest(this->game_mode + 1);
         this->ui->widget->update();
         this->show_who_put();
         this->show_who_win();
@@ -146,7 +145,6 @@ void MAINWINDOW::show_who_win() {
     if (this->game->chess->winner == 0) this->ui->who_win_show->setText("黑棋胜利✌"); 
     else if (this->game->chess->winner == 1) this->ui->who_win_show->setText("白棋胜利✌");
     this->ui->who_put_show->setText(QString());
-    return;
 };
 
 

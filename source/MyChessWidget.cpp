@@ -1,8 +1,9 @@
 ﻿#include "MyChessWidget.h"
+
+#include <iostream>
 #include <QPainter>
 #include <QMouseEvent>
 #include <qmessagebox.h>
-#include <iostream>
 #include <MainWindow.h>
 
 MyChessWidget::MyChessWidget(QWidget *parent)
@@ -73,8 +74,8 @@ void MyChessWidget::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         // 如果正在游戏且没有在搜索
         if (parentWidget->gamming and not parentWidget->AIisThinking) {
-            QRect innerRect = this->rect().adjusted(10, 10, -10, -10);
-            QPoint mouse_pos = event->pos();
+            const QRect innerRect = this->rect().adjusted(10, 10, -10, -10);
+            const QPoint mouse_pos = event->pos();
             int x_left = 0, y_up = 0, x_right = 0, y_down = 0;
             int x = mouse_pos.x(); // 获取鼠标横坐标，对应列数y
             int y = mouse_pos.y(); // 获取鼠标纵坐标，对应行数x

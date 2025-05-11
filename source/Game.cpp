@@ -1,9 +1,9 @@
-#include "Game.h"
-#include "Node.h"
+#include "../include/Game.h"
+#include "../include/Node.h"
 #include <iostream>
 #define SIZE 15
 #define METHOD 5
-#define TIME_LIMIT 15000
+#define TIME_LIMIT 30000
 Game::Game() {
     this->chess = new Chess(SIZE, METHOD);
 }
@@ -21,10 +21,8 @@ void Game::start_game() {
         this->step.push_back(this->chess->place_transform(x, y));
         //this->chess->show_mat();
         this->chess->judge();
-        std::cout << this->chess->winner << std::endl;
 
         if(this->chess->winner != -1) {
-            std::cout<<"winner: "<<this->chess->winner<<std::endl;
             this->reset_game();
             continue;
         }
@@ -46,14 +44,12 @@ bool Game::put(int x, int y){
     bool done = this->chess->put(x, y);
     if (done) { 
         this->step.push_back(x * this->chess->length + y); 
-        this->chess->put(x, y);
-        this->chess->judge_dfs();
-        //this->chess->judge();
+        this->chess->judge();
     }
     return done;
 }
 
-void Game::est(int times) {
+void Game::rest(const int times) {
     int last;
     if (this->step.size() < times) return;
     for (int i = 0; i < times; i++) {

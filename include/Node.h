@@ -1,5 +1,6 @@
-﻿#ifndef NODE_H
+#ifndef NODE_H
 #define NODE_H
+
 #include "State.h"
 
 class Node {

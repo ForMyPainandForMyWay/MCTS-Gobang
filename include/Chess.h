@@ -1,6 +1,6 @@
-﻿#ifndef CHESS_H
+#ifndef CHESS_H
 #define CHESS_H
-#include <vector>
+
 class Chess {
 public:
     int method = 5;  // 默认五子棋
@@ -17,6 +17,7 @@ public:
     bool put(int x, int y);
     int check(int x, int y) const;
     int judge();
+    //int judge_dfs();
     //void show_mat() const;
 };
 

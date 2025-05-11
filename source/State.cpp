@@ -1,6 +1,5 @@
-#include"State.h"
+#include "../include/State.h"
 
-#include <iostream>
 #define EMPTY (-1)
 
 State::State(Chess *chess) {

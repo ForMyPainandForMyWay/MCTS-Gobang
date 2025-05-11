@@ -107,7 +107,7 @@ int Node::expand() {
     return 1;
 }
 
-void Node::update(const float visit_add, float win_times) {
+void Node::update(const float visit_add, const float win_times) {
     // 更新当前结点
     this->visit = this->visit + visit_add;
     this->win_times = this->win_times + win_times;
@@ -188,9 +188,8 @@ int best_answer(const Node *node) {
 
 
 int MCTS_search(Chess* root_chess, const float time_limit) {
-    // 初始化时间变量和答案变量
-    const clock_t start = clock();
-    clock_t end = clock();
+    // 初始化答案变量
+    // cout << "########################################" << endl;
     int answer = -1;
 
     // 初始化状态根结点，并初次拓展与模拟，设置一个用于查找的temp指针
@@ -205,6 +204,8 @@ int MCTS_search(Chess* root_chess, const float time_limit) {
     // }
     Node *temp = &root;
     // 在时间范围内进行迭代优化,每次从根开始查找
+    const clock_t start = clock();
+    clock_t end = clock();
     while (end - start <= time_limit) {
         temp = &root;
         temp = temp->choice();
@@ -212,17 +213,19 @@ int MCTS_search(Chess* root_chess, const float time_limit) {
             // 所有子结点都已经完全展开，收敛
             break;
         }
-        // 存在未完全展开的字结点，不断展开到未曾展开的子节点
-        while (temp->expended) {
-            auto *_ = temp->choice();
-            if (_ == nullptr) {
-                goto end;  // 在搜索时达到一个胜负点，说明此时已经收敛
-            }
-            temp = _;
+        // 存在未完全展开的子结点，不断展开到未曾展开的子节点
+        while (temp->expended) {  // 如果已经被展开了，就继续向下寻找未展开的子节点
+            // auto *_ = temp->choice();
+            // if (_ == nullptr) {
+            //     goto end;  // 在搜索时达到一个胜负点，说明此时已经收敛
+            // }
+            // temp = _;
+            temp = temp->choice();
+            if (temp == nullptr) goto end;
         }
         temp->expand();
         roll_and_update_GPU(temp, ROLLTIMES);
-        //roll_and_update(temp, ROLLTIMES);
+        end = clock();
 
         // 废弃的单线程实现
         // for(const auto & i : temp->child) {
@@ -231,7 +234,6 @@ int MCTS_search(Chess* root_chess, const float time_limit) {
         // for(const auto & i : temp->child) {
         //     i->UCB();
         // }
-        end = clock();
     }
 
     end:
@@ -270,9 +272,10 @@ void roll_GPUthread(Node* child, const int roll_times) {
     int place_eles = int(place->size());
     int* place_arr = new int[place->size()];
     std::copy(place->begin(), place->end(), place_arr);
-    delete place;
 
     rollout_GPU(child, child->state->chess->length, place_arr, place_eles, roll_times);
+    delete place;
+    delete place_arr;
 }
 
 

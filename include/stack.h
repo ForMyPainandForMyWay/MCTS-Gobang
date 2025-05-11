@@ -1,5 +1,5 @@
-﻿#pragma once
-//#include <iostream>  
+#ifndef STACK_H
+#define STACK_H
 
 // 链栈结点的实现
 template <typename T>
@@ -74,7 +74,8 @@ public:
     }
 
     // 获取大小
-    int size() {
+    int size() const
+    {
         return this->size_;
     }
 
@@ -84,7 +85,7 @@ public:
     }
 
     // 获取index位置处的数据
-    T at(size_t index) {
+    T at(const int index) {
         if (index >= size_) {
             return 0;
         }
@@ -94,12 +95,12 @@ public:
 
 private:
     // 辅助函数，用于遍历到index位置并获取该位置结点
-    NodeforS<T>* getNodeAt(size_t index) {
+    NodeforS<T>* getNodeAt(const int index) {
         if (index >= size_) {
             //throw std::out_of_range("Index out of range");
         }
         NodeforS<T>* current = head;
-        for (size_t i = 0; i < index; ++i) {
+        for (int i = 0; i < index; ++i) {
             if (current == nullptr) {
                 //throw std::out_of_range("Index out of range");
             }
@@ -120,3 +121,5 @@ private:
         this->size_ = 0;
     }
 };
+
+#endif  // STACK_H
