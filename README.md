@@ -6,18 +6,25 @@
 
 除此之外，本项目还使用Qt开发了图形化界面。
 
-（包管理不搞了，CMake什么的也不想写了，反正源码能通过编译，将就着看吧）
+~~（包管理不搞了，CMake什么的也不想写了，反正源码能通过编译，将就着看吧）~~
 
----
+为了在KylinOS下构建项目，还是补完了CMake
 
-项目环境：
+基于Windows11：
 
-+ 编译器：**MSVC 19.16.27051** or **GCC** and **NVCC**
++ 编译器：**MSVC 19.16.27051** and **NVCC V12.3**
 
-+ IDE：**Visual Studio 2022 17.9.6** or **CLion 2025.1**
++ IDE：**Visual Studio 2022 17.9.6**
 
 + 其他：**CUDA 12.3**, **Qt 6.7.1**, **Qt Creator 13.0.2**, **QMake 3.1**
-  + or **CUDA**  **Qt 6.2.8**, **CMake 3.21**
+
+基于KylinOS V10 SP1
+
++ 编译器：**MSVC 19.16.27051** or **GCC 9.4.0** and **NVCC V12.8.61**.
+
++ IDE: **CLion 2025.1**
+
++ 其他: **CUDA 12.8**  **Qt 6.2.8**, **CMake 3.21**
 
 ---
 
