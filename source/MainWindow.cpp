@@ -1,14 +1,13 @@
 ﻿#ifndef MAINWINDOW_CPP
 #define MAINWINDOW_CPP
 
-#include <QMessageBox>  
+// #include <QMessageBox>
 #include "ui_Widget.h"
 #include "MainWindow.h"
-#include <QPainter>
+// #include <QPainter>
 #include <QtWidgets/QWidget>
-#include <Qobject>
+#include <QObject>
 #include <QMessageBox>
-#include <iostream>
 #define PVP 0
 #define PVE 1
 
@@ -30,7 +29,6 @@ MAINWINDOW::MAINWINDOW(Game *game, QWidget* parent):
     this->ui->reset_game->setEnabled(false);
     this->ui->who_put_show->setText(QString());
     
-
     QObject::connect(ui->start_game, &QPushButton::clicked, this, &MAINWINDOW::start_game);
     QObject::connect(ui->reset_game, &QPushButton::clicked, this, &MAINWINDOW::reset_game);
     QObject::connect(ui->reput, &QPushButton::clicked, this, &MAINWINDOW::reput);
@@ -146,7 +144,6 @@ void MAINWINDOW::show_who_win() {
     if (this->game->chess->winner == 0) this->ui->who_win_show->setText("黑棋胜利✌"); 
     else if (this->game->chess->winner == 1) this->ui->who_win_show->setText("白棋胜利✌");
     this->ui->who_put_show->setText(QString());
-    return;
 };
 
 

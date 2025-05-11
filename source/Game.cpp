@@ -47,8 +47,8 @@ bool Game::put(int x, int y){
     if (done) { 
         this->step.push_back(x * this->chess->length + y); 
         this->chess->put(x, y);
-        this->chess->judge_dfs();
-        //this->chess->judge();
+        //this->chess->judge_dfs();
+        this->chess->judge();
     }
     return done;
 }

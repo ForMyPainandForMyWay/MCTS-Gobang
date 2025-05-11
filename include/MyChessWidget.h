@@ -1,9 +1,7 @@
 ﻿#pragma once
 
 #include <QWidget>
-//#include "ui_MyChessWidget.h"
-#include "stack.h"
-#include <deque>
+// #include <deque>
 #include <Game.h>
 
 class MyChessWidget : public QWidget 
@@ -17,9 +15,9 @@ public:
 	//std::deque<int>* step;  // 走过区域的栈，由Game类传入
 	Stack_M<int>* step;
 	Game* game = nullptr;
-	MyChessWidget(QWidget* parent = nullptr);
-	~MyChessWidget();
+	explicit MyChessWidget(QWidget* parent = nullptr);
+	~MyChessWidget() override;
 private:
-	void paintEvent(QPaintEvent* event);  // 重载绘制函数
-	void mousePressEvent(QMouseEvent* event);  // 重载点击函数
+	void paintEvent(QPaintEvent* event) override;  // 重载绘制函数
+	void mousePressEvent(QMouseEvent* event) override;  // 重载点击函数
 };
