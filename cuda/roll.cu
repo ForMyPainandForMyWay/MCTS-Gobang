@@ -4,16 +4,13 @@
 #include "device_launch_parameters.h"
 #include "roll.cuh"
 
-
 using namespace std;
 #define METHOD 5
 #define NO_MAN (-1)
 recursive_mutex mut2;
 
 __device__ void cudaSwap(int& a, int& b) {
-	a ^= b;
-	b ^= a;
-	a ^= b;
+	a ^= b ^= a ^= b;
 }
 
 __device__ int transform_GPU(const int x, const int y, const int chess_length) {
@@ -25,7 +22,7 @@ __device__ int judge_GPU(const int* mat, const int input_place, const int chess_
 	const int y = input_place % chess_len;
 	const int x = input_place / chess_len;  // 更安全的除法写法
 
-	// 四个方向的增量：水平、垂直、正对角线、反对角线
+	// 四向增量：水平、垂直、正对角线、反对角线
 	constexpr int dirs[4][2] = {{1,0}, {0,1}, {1,1}, {-1,1}};
 
 	for (const auto dir : dirs) {
@@ -61,7 +58,7 @@ __device__ int judge_GPU(const int* mat, const int input_place, const int chess_
 			++count;
 		}
 
-		// 判断是否满足连珠条件
+		// 连珠条件
 		if (count >= METHOD) {
 			return player;
 		}
@@ -95,7 +92,7 @@ __global__ void roll_paralell(const int* mat,const int* step_nums,const int* pla
 	curand_init(clock64() + id, id, 0, &state); // 使用相同的种子和不同的序列数来初始化
 	for (int i = 0; i < *step_nums; i++) step[i] = place[i];
 	for (int i = *step_nums - 1; i >= 1; --i) cudaSwap(step[i], step[int(curand_uniform(&state)* *chess_len) % i]);
-	
+
 	// 随机落子
 	while (win == -1 && index < *step_nums) {
 		const int put_place = step[index];
@@ -124,8 +121,8 @@ void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int
 	cudaSetDevice(iDevice);
 
 	// 将记录结果用的数字改为数组
-	auto *host_win_times = new float[roll_times];
-	memset(host_win_times, 0, roll_times * sizeof(float));
+	auto *host_win_times = new int[roll_times];
+	memset(host_win_times, 0, roll_times * sizeof(int));
 
 	// 创建所有线程的落子顺序序列，每个线程对应一定的范围(已废弃，改为由GPU自己创建)
 	/*int* host_step = new int[roll_times * place_eles];
@@ -151,7 +148,7 @@ void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int
 	// 定义device数据(棋盘和落子位置),分配内存空间
 	int *device_place,*device_step_nums, *device_length, *player_now, *device_mat;
 	int* devices_win_times;
-	// 直接调用 cudaMalloc，移除错误检查包装
+
 	cudaMalloc((void**)&player_now, sizeof(int));
 	cudaMalloc((void**)&device_mat, sizeof(int) * mat_len);
 	cudaMalloc((void**)&device_place, sizeof(int) * place_eles);
@@ -182,8 +179,8 @@ void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int
 	cudaDeviceSynchronize();
 
 	// 将结果拷贝到host
-	cudaMemcpy(host_win_times, devices_win_times, sizeof(float) * roll_times, cudaMemcpyDeviceToHost);
-	
+	cudaMemcpy(host_win_times, devices_win_times, sizeof(int) * roll_times, cudaMemcpyDeviceToHost);
+
 	// 统计结果
 	float win_times = 0;
 	for (int i = 0; i < roll_times; i++) if (host_win_times[i] == 1) win_times++;
