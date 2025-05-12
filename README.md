@@ -20,7 +20,7 @@
 
 基于KylinOS V10 SP1
 
-+ 编译器：**MSVC 19.16.27051** or **GCC 9.4.0** and **NVCC V12.8.61**.
++ 编译器：**GCC 9.4.0** and **NVCC V12.8.61**.
 
 + IDE: **CLion 2025.1**
 
