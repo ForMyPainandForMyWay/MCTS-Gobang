@@ -12,13 +12,13 @@
 #define PVP 0
 #define PVE 1
 
-MAINWINDOW::MAINWINDOW(Game *game, QWidget* parent):
+MainWindow::MainWindow(Game *game, QWidget* parent):
     QWidget(parent),
     ui(new Ui::Form)
 {
     ui->setupUi(this);
     this->game = game;
-    this->gamming = false;
+    this->is_gamming = false;
     //this->endgame = true;  // 初始状态(结束游戏)不允许落子(已废弃)
     this->AIisThinking = false;
     this->game_mode = PVP;  // 初始游戏模式为PVP
@@ -30,13 +30,13 @@ MAINWINDOW::MAINWINDOW(Game *game, QWidget* parent):
     this->ui->reset_game->setEnabled(false);
     this->ui->who_put_show->setText(QString());
     
-    connect(ui->start_game, &QPushButton::clicked, this, &MAINWINDOW::start_game);
-    connect(ui->reset_game, &QPushButton::clicked, this, &MAINWINDOW::reset_game);
-    connect(ui->reput, &QPushButton::clicked, this, &MAINWINDOW::reput);
-    connect(ui->game_mode, &QComboBox::currentTextChanged, this, &MAINWINDOW::reset_game_mode);
+    connect(ui->start_game, &QPushButton::clicked, this, &MainWindow::start_game);
+    connect(ui->reset_game, &QPushButton::clicked, this, &MainWindow::reset_game);
+    connect(ui->reput, &QPushButton::clicked, this, &MainWindow::reput);
+    connect(ui->game_mode, &QComboBox::currentTextChanged, this, &MainWindow::reset_game_mode);
 }
 
-MAINWINDOW::~MAINWINDOW(){
+MainWindow::~MainWindow(){
     delete ui;
     delete game;
     ui = nullptr;
@@ -45,9 +45,9 @@ MAINWINDOW::~MAINWINDOW(){
 }
 
 // 开始游戏
-void MAINWINDOW::start_game() {
+void MainWindow::start_game() {
     this->reset_game();
-    this->gamming = true;
+    this->is_gamming = true;
     //this->endgame = false;
     this->AIisThinking = false;
     
@@ -64,10 +64,10 @@ void MAINWINDOW::start_game() {
 
 
 // 重置游戏
-void MAINWINDOW::reset_game() {
+void MainWindow::reset_game() {
     if (this->AIisThinking) return;
     // 重置游戏状态
-    this->gamming = false;
+    this->is_gamming = false;
     this->AIisThinking = false;
     //this->endgame = false;
 
@@ -89,7 +89,7 @@ void MAINWINDOW::reset_game() {
 };
 
 // 悔棋
-void MAINWINDOW::reput() {
+void MainWindow::reput() {
     if (this->game->step.size() != 0) {
         this->game->rest(this->game_mode + 1);
         this->ui->widget->update();
@@ -97,7 +97,7 @@ void MAINWINDOW::reput() {
         this->show_who_win();
 
         this->ui->widget->setEnabled(true);
-        this->gamming = true;
+        this->is_gamming = true;
         //this->endgame = false;
         this->AIisThinking = false;
     }
@@ -116,7 +116,7 @@ void MAINWINDOW::reput() {
 };
 
 // 模式切换
-void MAINWINDOW::reset_game_mode() {
+void MainWindow::reset_game_mode() {
     // 当AI搜索时，阻止切换模式(已废弃，不会被调用)
     if (AIisThinking) {
         this->ui->game_mode->setCurrentIndex(PVE);
@@ -128,7 +128,7 @@ void MAINWINDOW::reset_game_mode() {
 };
 
 // 展示哪一方落子，设置文字提示
-void MAINWINDOW::show_who_put() {
+void MainWindow::show_who_put() {
     // Player_0=0 对应黑子，Player_1=1 对应白子
     if (this->game->chess->who_place_now) {
         this->ui->who_put_show->setText("请白棋落子");
@@ -137,7 +137,7 @@ void MAINWINDOW::show_who_put() {
 };
 
 // 只有有人胜利时才能调用，展示哪一方胜利，设置文字提示
-void MAINWINDOW::show_who_win() {
+void MainWindow::show_who_win() {
     if (this->game->chess->winner == -1) {
         this->ui->who_win_show->setText(QString());
         return;
@@ -149,8 +149,8 @@ void MAINWINDOW::show_who_win() {
 
 
 // 结束局面，只有某一方胜利时才可以调用
-void MAINWINDOW::end_game() {
-    this->gamming = false;
+void MainWindow::end_game() {
+    this->is_gamming = false;
     //this->endgame = true;
     this->AIisThinking = false;
     this->ui->widget->setEnabled(false);

@@ -44,7 +44,7 @@ public:
     }
 
     // 获取大小
-    int size() const
+    [[nodiscard]] int size() const
     {
         return this->size_;
     }

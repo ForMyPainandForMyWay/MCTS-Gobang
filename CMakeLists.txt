@@ -26,6 +26,7 @@ message("${INC}")
 file(GLOB CUSRC "${PROJECT_SOURCE_DIR}/cuda/*")
 add_library(curoll SHARED ${CUSRC})
 target_include_directories(curoll PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_compile_options(curoll PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--default-stream=per-thread>)
 set_target_properties(curoll PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 # 编译源文件链接动态库

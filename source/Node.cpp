@@ -8,30 +8,26 @@
 #define COMPLETE 3
 #define PARTLY 4
 #define ALL_NOT 5
-#define ROLLTIMES 1024
-void roll_and_update_GPU(Node* root, int roll_times);
-void roll_GPUthread(Node* child, const int roll_times);
+#define ROLL_TIMES 1024
+
+
 using namespace std;
 recursive_mutex mut;
 
-Node::Node(State *state, const bool copy=false) {
-    if (copy) this->state = new State(state->chess);
-    else this->state = state;
+Node::Node(State *state) {
+    this->state = state;
 
     // 初始化孩子
-    this->child_nums = int(this->state->workable_place.size());
+    this->child_nums = static_cast<int>(this->state->workable_place.size());
     this->child_nums_expanded = 0;
-    /*for (int i = 0; i < child_nums; i++) {
-        //this->none_child.push_back(this->state->workable_place[i]);
-        // this->state->workable_place.pop_back();
-    }*/
 }
 
 Node::~Node() {
     delete this->state;
     this->state = nullptr;
     this->parent = nullptr;
-    while (!this->child.empty()) this->child.pop_back();
+    for (const auto child : this->child)delete child;
+    this->child.clear();
 }
 
 float Node::UCB(const float C=2) {
@@ -43,13 +39,12 @@ float Node::UCB(const float C=2) {
 }
 
 
-void Node::add_child(State *child_state, bool copy) {
-    const auto node = new Node(child_state, copy);
+void Node::add_child(State *state) {
+    const auto node = new Node(state);
     node->parent = this;
     node->state->chess->judge();
     node->state->leaf = node->state->chess->winner;
     this->child.push_back(node);
-
 }
 
 int Node::full_expand() const {
@@ -97,7 +92,7 @@ int Node::expand() {
     for (const int i : this->state->workable_place) {
         const int y_ = i % this->state->chess->length;
         const int x_ = (i - y_) / this->state->chess->length;
-        this->add_child(new State(this->state->chess, x_, y_), true);
+        this->add_child(new State(this->state->chess, x_, y_));
         if (this->child.back()->state->leaf != -1) {
             this->child.back()->expended = 1;
         }
@@ -129,50 +124,51 @@ std::vector<int>* find_place(const Node *node) {
     return place;
 }
 
-void rollout(Node *node, const std::vector<int> *place, int roll_times=1024) {
-    // 对某一个结点进行rollout，在一定次数以内随机落子
-    float  times=0, win_times=0;
-    if (node->state->leaf == 1) {
-        mut.lock();
-        // 对模拟结点进行反向传播
-        node->update(1.0, 1.0);
-        mut.unlock();
-        return;
-    }
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
-    while(roll_times > 0) {
-        times++;
-        roll_times--;
-
-        // 每次棋局 创建结点与落子坐标的副本
-        std::vector<int> temp_vector = *place;
-        const auto* temp = new Node(node->state, true);
-        while(temp->state->chess->winner == -1 && !temp_vector.empty()) {
-            constexpr int min_value = 0;
-            const int max_value = int(temp_vector.size())-1;
-
-            // 计算vector内的随机index
-            const int index = min_value + std::rand() % (max_value - min_value + 1);
-
-            // 落子
-            const int y = (temp_vector[index] % temp->state->chess->length);
-            const int x = (temp_vector[index] - y) / temp->state->chess->length;
-            temp->state->chess->put(x, y);
-            // 丢弃走过的位置
-            temp_vector.erase(temp_vector.begin() + index);
-            // 判断
-            temp->state->chess->judge();
-        }
-        if (temp->state->chess->winner != -1) win_times = win_times + static_cast<float>(temp->state->chess->winner);
-        delete temp;
-    }
-    // 对模拟结点进行反向传播
-    mut.lock();
-    node->update(1, win_times/times);
-    mut.unlock();
-    delete place;
-}
+// void rollout(Node *node, const std::vector<int> *place, int roll_times=1024) {
+//     // 对某一个结点进行rollout，在一定次数以内随机落子
+//     float  times=0, win_times=0;
+//     if (node->state->leaf == 1) {
+//         mut.lock();
+//         // 对模拟结点进行反向传播
+//         node->update(1.0, 1.0);
+//         mut.unlock();
+//         delete place;
+//         return;
+//     }
+//     std::srand(static_cast<unsigned int>(std::time(nullptr)));
+//
+//     while(roll_times > 0) {
+//         times++;
+//         roll_times--;
+//
+//         // 每次棋局 创建结点与落子坐标的副本
+//         std::vector<int> temp_vector = *place;
+//         const auto* temp = new Node(node->state);
+//         while(temp->state->chess->winner == -1 && !temp_vector.empty()) {
+//             constexpr int min_value = 0;
+//             const int max_value = static_cast<int>(temp_vector.size())-1;
+//
+//             // 计算vector内的随机index
+//             const int index = min_value + std::rand() % (max_value - min_value + 1);
+//
+//             // 落子
+//             const int y = (temp_vector[index] % temp->state->chess->length);
+//             const int x = (temp_vector[index] - y) / temp->state->chess->length;
+//             temp->state->chess->put(x, y);
+//             // 丢弃走过的位置
+//             temp_vector.erase(temp_vector.begin() + index);
+//             // 判断
+//             temp->state->chess->judge();
+//         }
+//         if (temp->state->chess->winner != -1) win_times = win_times + static_cast<float>(temp->state->chess->winner);
+//         delete temp;
+//     }
+//     // 对模拟结点进行反向传播
+//     mut.lock();
+//     node->update(1, win_times/times);
+//     mut.unlock();
+//     delete place;
+// }
 
 int best_answer(const Node *node) {
     int answer = -1;
@@ -187,103 +183,82 @@ int best_answer(const Node *node) {
 }
 
 
-int MCTS_search(Chess* root_chess, const float time_limit) {
+int MCTS_search(const Chess* root_chess, const float time_limit) {
     // 初始化答案变量
-    // cout << "########################################" << endl;
-    int answer = -1;
 
     // 初始化状态根结点，并初次拓展与模拟，设置一个用于查找的temp指针
     auto root = Node(new State(root_chess));
     root.expand();
-    roll_and_update_GPU(&root, ROLLTIMES);
-    //for(const auto & i : root.child) {
-    //    rollout(i, find_place(i), 104);
-    //}
-    // for(const auto & i : root.child) {
-    //     i->UCB();
-    // }
+    roll_and_update_GPU(&root, ROLL_TIMES);
     Node *temp = &root;
     // 在时间范围内进行迭代优化,每次从根开始查找
     const clock_t start = clock();
     clock_t end = clock();
     while (end - start <= time_limit) {
-        temp = &root;
         temp = temp->choice();
-        if (temp == nullptr) {
-            // 所有子结点都已经完全展开，收敛
-            break;
-        }
+        if (temp == nullptr) break;  // 所有子结点都已经完全展开，收敛
         // 存在未完全展开的子结点，不断展开到未曾展开的子节点
-        while (temp->expended) {  // 如果已经被展开了，就继续向下寻找未展开的子节点
-            // auto *_ = temp->choice();
-            // if (_ == nullptr) {
-            //     goto end;  // 在搜索时达到一个胜负点，说明此时已经收敛
-            // }
-            // temp = _;
+        while (temp->expended) {
+            // 如果已经被展开了，就继续向下寻找未展开的子节点
             temp = temp->choice();
-            if (temp == nullptr) goto end;
+            if (temp == nullptr) goto end;  // 在搜索时达到一个胜负点，说明此时已经收敛
         }
         temp->expand();
-        roll_and_update_GPU(temp, ROLLTIMES);
+        roll_and_update_GPU(temp, ROLL_TIMES);
         end = clock();
-
-        // 废弃的单线程实现
-        // for(const auto & i : temp->child) {
-        //     rollout(i, find_place(i), 1000);
-        // }
-        // for(const auto & i : temp->child) {
-        //     i->UCB();
-        // }
     }
 
     end:
-    answer = best_answer(&root);
+    const int answer = best_answer(&root);
     return answer;
 }
 
-void roll_thread(Node *child,const int roll_times) {
-    rollout(child, find_place(child), roll_times);
-}
-
+// void roll_thread(Node *child,const int roll_times) {
+//     rollout(child, find_place(child), roll_times);
+// }
+//
 void UCB_thread(Node *child) {
     child->UCB();
 }
-
-void roll_and_update(Node* root,int roll_times) {
-    std::vector<std::thread> pool;
-    for(int i = 0; i < root->child.size(); i++) {
-        pool.push_back(std::thread(roll_thread, root->child[i], 1024));
-    }
-    for(int i = 0; i < root->child.size(); i++) {
-        pool[i].join();
-    }
-
-    for(int i = 0; i < root->child.size(); i++) {
-        pool[i] = std::thread(UCB_thread, root->child[i]);
-    }
-    for(int i = 0; i < root->child.size(); i++) {
-        pool[i].join();
-    }
-};
+//
+// void roll_and_update(Node* root,int roll_times) {
+//     std::vector<std::thread> pool;
+//     pool.reserve(root->child.size());
+//
+//     for(auto & i : root->child) {
+//         pool.emplace_back(roll_thread, i, roll_times);
+//     }
+//     for(int i = 0; i < root->child.size(); i++) {
+//         pool[i].join();
+//     }
+//
+//     for(int i = 0; i < root->child.size(); i++) {
+//         pool[i] = std::thread(UCB_thread, root->child[i]);
+//     }
+//     for(int i = 0; i < root->child.size(); i++) {
+//         pool[i].join();
+//     }
+// };
 
 // 以下为GPU版本的函数
 void roll_GPUthread(Node* child, const int roll_times) {
     std::vector<int>* place = find_place(child);
-    int place_eles = int(place->size());
-    int* place_arr = new int[place->size()];
+    const int place_eles = int(place->size());
+    const auto place_arr = new int[place->size()];
     std::copy(place->begin(), place->end(), place_arr);
 
     rollout_GPU(child, child->state->chess->length, place_arr, place_eles, roll_times);
     delete place;
-    delete place_arr;
+    delete[] place_arr;
 }
 
 
 void roll_and_update_GPU(Node* root, int roll_times) {
     std::vector<std::thread> pool;
-    for (int i = 0; i < root->child.size(); i++) {
-        pool.push_back(std::thread(roll_GPUthread, root->child[i], roll_times));
-    }
+    pool.reserve(root->child.size());
+    for (auto & i : root->child) {
+            pool.emplace_back(roll_GPUthread, i, roll_times);
+        }
     for (int i = 0; i < root->child.size(); i++) {
         pool[i].join();
     }

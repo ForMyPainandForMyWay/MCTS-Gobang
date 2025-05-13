@@ -39,8 +39,8 @@ Chess::~Chess() {
     this->mat = nullptr;
 }
 
-bool Chess::put(int x, int y) {
-    int check_result = check(x, y);
+bool Chess::put(const int x, const int y) {
+    const int check_result = check(x, y);
     if (check_result == EMPTY) {
         this->mat[this->place_transform(x, y)] = this->who_place_now;
         this->who_place_now = this->who_place_next;

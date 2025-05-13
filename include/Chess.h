@@ -11,11 +11,11 @@ public:
     int place_index_last=0;  //上一次落子的位置
     int winner = -1;
     Chess(int length, int method);
-    Chess(const Chess *chess);
+    explicit Chess(const Chess *chess);
     ~Chess();
-    int place_transform(int x, int y) const;
+    [[nodiscard]] int place_transform(int x, int y) const;
     bool put(int x, int y);
-    int check(int x, int y) const;
+    [[nodiscard]] int check(int x, int y) const;
     int judge();
     //int judge_dfs();
     //void show_mat() const;

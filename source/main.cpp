@@ -6,9 +6,9 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-    Game* game = new Game;
-    MAINWINDOW wid(game);
+    const auto game = new Game;
+    MainWindow wid(game);
     wid.show();
     
-    return a.exec();
+    return QApplication::exec();
 }

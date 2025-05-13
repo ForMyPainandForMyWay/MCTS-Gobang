@@ -3,7 +3,7 @@
 #include <iostream>
 #define SIZE 15
 #define METHOD 5
-#define TIME_LIMIT 30000
+#define TIME_LIMIT 300000
 Game::Game() {
     this->chess = new Chess(SIZE, METHOD);
 }
@@ -40,8 +40,8 @@ void Game::start_game() {
     }
 }
 
-bool Game::put(int x, int y){
-    bool done = this->chess->put(x, y);
+bool Game::put(const int x, const int y){
+    const bool done = this->chess->put(x, y);
     if (done) { 
         this->step.push_back(x * this->chess->length + y); 
         this->chess->judge();
@@ -71,14 +71,10 @@ void Game::reset_game() {
 }
 
 int Game::search() {
-    int x, y;
-    bool done;
-    int next = MCTS_search(this->chess, TIME_LIMIT);
-    y = next % this->chess->length;
-    x = (next - y) / this->chess->length;
-
-    done = this->put(x, y);
-    return  0;
+    const int next = MCTS_search(this->chess, TIME_LIMIT);
+    const int y = next % this->chess->length;
+    const int x = (next - y) / this->chess->length;
+    return this->put(x, y);
 }
 
 

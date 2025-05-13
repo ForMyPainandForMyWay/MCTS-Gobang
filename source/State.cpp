@@ -2,12 +2,12 @@
 
 #define EMPTY (-1)
 
-State::State(Chess *chess) {
+State::State(const Chess *chess) {
     // 初始化状态的棋盘(拷贝一个)
     this->chess = new Chess(chess);
 
-    int y = this->chess->place_index_last % this->chess->length;
-    int x = (this->chess->place_index_last - y) / this->chess->length;
+    const int y = this->chess->place_index_last % this->chess->length;
+    const int x = (this->chess->place_index_last - y) / this->chess->length;
 
     // 初始化可行域
     for (int i = x-2; i <= x+2; i++) {
@@ -30,7 +30,8 @@ State::~State() {
 //     return next;
 // }
 
-State::State(Chess *chess, int x_, int y_) {
+State::State(const Chess *chess, const int x_, const int y_) {
+    // 拷贝并落子
     // 主要用于子节点的构造函数，传入chess和可落子的位置，生成落子后的状态
     this->chess = new Chess(chess);
     // 落子
