@@ -1,28 +1,26 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <bits/unique_ptr.h>
-
 #include "State.h"
 
 class Node {
 public:
     State* state = nullptr;  // 结点对应状态
     float score=3.402823466e+38F, visit=0, win_times=0;  // 结点对应的分数，访问次数，赢下次数
-    int child_nums_expanded=0, child_nums=0, expended=0;  // 展开的孩子数量，孩子数量，自己是否展开过
-    //int leaf=-1;  // 是否叶节点？(转移到了State上面)
+    int ChildNumsExpanded=0, ChildNums=0, Expended=0;  // 展开的孩子数量，孩子数量，自己是否展开过
+    //int Lear=-1;  // 是否叶节点？(转移到了State上面)
     //std::vector<int> none_child{};  // 所有尚未生成的孩子结点，存储孩子的可落子位置(可以用state的workable，似乎用不上)
-    std::vector<Node*> child{};  // 展开过的孩子结点
+    std::vector<Node*> Child{};  // 展开过的孩子结点
     Node *parent=nullptr;  // 父母结点
     explicit Node(State* state);
     ~Node();
     float UCB(float C);
-    void add_child(State* state);  // 添加孩子结点
-    [[nodiscard]] int full_expand() const;  // 判断所有子结点都展开函数
-    [[nodiscard]] Node* choice() const;  // 选择函数
-    int expand();  //  拓展函数
+    void AddChild(State* state);  // 添加孩子结点
+    [[nodiscard]] int FullExpand() const;  // 判断所有子结点都展开函数
+    [[nodiscard]] Node* Choice() const;  // 选择函数
+    int Expand();  //  拓展函数
     // 模拟函数
-    void update(float visit_add, float win_times);  // 反向传播
+    void Update(float visit_add, float win_times);  // 反向传播
 };
 
 // 辅助函数

@@ -15,10 +15,10 @@ public:
     Stack_MARR<int> step;
     Game();
     ~Game();
-    void start_game();  // 开始游戏，用于命令行窗口
-    bool put(int x, int y);
-    void rest(int times = 2);  // 不同模式的悔棋
-    int search();  // 蒙特卡洛树搜索
-    void reset_game();  // 重置游戏
+    //void StartGame();  // 开始游戏，用于命令行窗口
+    bool Put(int x, int y);
+    void Rest(int times = 2);  // 不同模式的悔棋
+    int Search();  // 蒙特卡洛树搜索
+    void ReSetGame();  // 重置游戏
 };
 #endif //GAME_H

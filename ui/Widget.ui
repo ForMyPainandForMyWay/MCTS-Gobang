@@ -64,7 +64,7 @@
          </font>
         </property>
         <property name="text">
-         <string>无法悔棋</string>
+         <string>准备落子</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

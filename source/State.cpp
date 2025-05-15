@@ -1,4 +1,4 @@
-#include "../include/State.h"
+#include "State.h"
 
 #define EMPTY (-1)
 
@@ -6,14 +6,14 @@ State::State(const Chess *chess) {
     // 初始化状态的棋盘(拷贝一个)
     this->chess = new Chess(chess);
 
-    const int y = this->chess->place_index_last % this->chess->length;
-    const int x = (this->chess->place_index_last - y) / this->chess->length;
+    const int y = this->chess->PlaceIndexLast % this->chess->Length;
+    const int x = (this->chess->PlaceIndexLast - y) / this->chess->Length;
 
     // 初始化可行域
     for (int i = x-2; i <= x+2; i++) {
         for (int j = y-2; j <= y+2; j++) {
             if (this->chess->check(i, j) == EMPTY) {
-                this->workable_place.push_back(this->chess->place_transform(i, j));
+                this->WorkablePlace.push_back(this->chess->PlaceTransform(i, j));
             }
         }
     }
@@ -36,18 +36,18 @@ State::State(const Chess *chess, const int x_, const int y_) {
     this->chess = new Chess(chess);
     // 落子
     this->chess->put(x_, y_);
-    if (this->chess->judge() == -1) {
+    if (this->chess->Judge() == -1) {
         // 当这个子节点不是叶结点时，初始化可行域
         for (int i = x_-2; i <= x_+2; i++) {
             for (int j = y_-2; j <= y_+2; j++) {
                 if (this->chess->check(i, j) == EMPTY) {
-                    this->workable_place.push_back(this->chess->place_transform(i, j));
+                    this->WorkablePlace.push_back(this->chess->PlaceTransform(i, j));
                 }
             }
         }
     }
     else {
         // 获胜后为叶节点，无需寻找可以落子的位置
-        this->leaf = this->chess->winner;
+        this->Lear = this->chess->Winner;
     }
 }

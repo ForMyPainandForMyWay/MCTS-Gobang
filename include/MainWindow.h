@@ -11,22 +11,22 @@ class MainWindow final : public QWidget
 
 public:
     Game* game;
-    bool is_gamming;  // 正在游戏
+    bool IsGaming;  // 正在游戏
     //bool endgame;  // 游戏结束
     bool AIisThinking;  // 正在搜索
-    int game_mode = PVP;  // 游戏模式
+    int GameMode = PVP;  // 游戏模式
     explicit MainWindow(Game* game, QWidget* parent = nullptr);
     ~MainWindow() override;
-    void show_who_put();  // 展示该谁落子
-    void show_who_win();  // 展示谁赢了
-    void end_game();  // 结束游戏
+    void ShowWhoPut() const;  // 展示该谁落子
+    void ShowWhoWin() const;  // 展示谁赢了
+    void EndGame();  // 结束游戏
 
 private:
     Ui::Form* ui;
 
 private slots:
-    void start_game();  // 开始游戏按键
-    void reset_game();  // 重置游戏按键
-    void reput();  // 悔棋
-    void reset_game_mode(); // 设置游戏模式
+    void StartGame();  // 开始游戏按键
+    void ReSetGame();  // 重置游戏按键
+    void RePut();  // 悔棋
+    void ReSetGameMode(); // 设置游戏模式
 };

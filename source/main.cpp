@@ -1,6 +1,5 @@
-#include "../include/Game.h"
-#include<QApplication>
-#include "../include/MainWindow.h"
+#include "Game.h"
+#include "MainWindow.h"
 
 using namespace std;
 

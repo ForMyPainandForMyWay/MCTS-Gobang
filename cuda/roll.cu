@@ -3,10 +3,8 @@
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
 #include "roll.cuh"
-using namespace std;
 #define METHOD 5
 #define NO_MAN (-1)
-recursive_mutex mut2;
 
 
 #define CHECK_KERNEL_CALL() do { \
@@ -22,16 +20,19 @@ exit(EXIT_FAILURE); \
 } \
 } while(0)
 
+// using namespace std;
+std::recursive_mutex mut2;
 
 __device__ void cudaSwap(int& a, int& b) {
 	a ^= b ^= a ^= b;
 }
 
-__device__ int transform_GPU(const int x, const int y, const int chess_length) {
+__device__ int TransformGPU(const int x, const int y, const int chess_length) {
 	return x * chess_length + y;
 }
 
-__device__ int judge_GPU(const int* mat, const int input_place, const int chess_len, const int player) {
+__device__ int JudgeGPU(const int* mat, const int input_place, const int chess_len, const int player)
+{
 	const int max_bound = chess_len - 1;
 	const int y = input_place % chess_len;
 	const int x = input_place / chess_len;  // 更安全的除法写法
@@ -53,7 +54,7 @@ __device__ int judge_GPU(const int* mat, const int input_place, const int chess_
 			if (nx < 0 || nx > max_bound || ny < 0 || ny > max_bound) break;
 
 			// 棋子匹配检查
-			if (mat[transform_GPU(nx, ny, chess_len)] != player) break;
+			if (mat[TransformGPU(nx, ny, chess_len)] != player) break;
 
 			++count;
 		}
@@ -67,7 +68,7 @@ __device__ int judge_GPU(const int* mat, const int input_place, const int chess_
 			if (nx < 0 || nx > max_bound || ny < 0 || ny > max_bound) break;
 
 			// 棋子匹配检查
-			if (mat[transform_GPU(nx, ny, chess_len)] != player) break;
+			if (mat[TransformGPU(nx, ny, chess_len)] != player) break;
 
 			++count;
 		}
@@ -79,7 +80,7 @@ __device__ int judge_GPU(const int* mat, const int input_place, const int chess_
 	return NO_MAN;
 }
 
-__global__ void roll_paralell(const int* __restrict__ mat, const int* __restrict__ step_nums,
+__global__ void RollParalell(const int* __restrict__ mat, const int* __restrict__ step_nums,
 							const int* __restrict__ place, int* __restrict__ win_times,
 							const int* __restrict__ chess_len, const int* __restrict__ player_now,
 							int* __restrict__ global_mat_buffer, int* __restrict__ global_step_buffer)
@@ -114,28 +115,29 @@ __global__ void roll_paralell(const int* __restrict__ mat, const int* __restrict
     while (win == NO_MAN && index < *step_nums) {
         const int put_place = step[index++];
         mat_GPU[put_place] = player_now_local;
-        win = judge_GPU(mat_GPU, put_place, *chess_len, player_now_local);
+        win = JudgeGPU(mat_GPU, put_place, *chess_len, player_now_local);
         player_now_local = (player_now_local + 1) % 2;
     }
     win_times[id] = win;
 };
 
 
-void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int roll_times) {
+void RollOutGPU(Node* node, const int mat_size,  const int* place, const int place_eles, const int roll_times)
+{
 	// 预先判断是否可以rollout
-	if (node->state->leaf == 1) {
+	if (node->state->Lear == 1) {
 		mut2.lock();
 		// 对模拟结点进行反向传播
-		node->update(1.0, 1.0);
+		node->Update(1.0, 1.0);
 		mut2.unlock();
 		return;
 	}
 
-    constexpr int iDevice = 0;
-    cudaSetDevice(iDevice);
+    // constexpr int iDevice = 0;
+    // cudaSetDevice(iDevice);
 	// 计算棋盘参数
 	const int S = mat_size * mat_size;
-	const int chess_len = node->state->chess->length;
+	const int chess_len = node->state->chess->Length;
 
     // Host存储结果
     const auto host_win_times = new int[roll_times];
@@ -159,7 +161,7 @@ void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int
     cudaMalloc(&global_step_buffer, roll_times * place_eles * sizeof(int));
 
     // 数据拷贝
-    cudaMemcpyAsync(player_now, &node->state->chess->who_place_next, sizeof(int), cudaMemcpyHostToDevice, cudaStreamPerThread);
+    cudaMemcpyAsync(player_now, &node->state->chess->WhoPlaceNext, sizeof(int), cudaMemcpyHostToDevice, cudaStreamPerThread);
     cudaMemcpyAsync(device_mat, node->state->chess->mat, S * sizeof(int), cudaMemcpyHostToDevice, cudaStreamPerThread);
     cudaMemcpyAsync(device_place, place, place_eles * sizeof(int), cudaMemcpyHostToDevice, cudaStreamPerThread);
     cudaMemcpyAsync(device_step_nums, &place_eles, sizeof(int), cudaMemcpyHostToDevice, cudaStreamPerThread);
@@ -168,7 +170,7 @@ void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int
     // 运行核函数,随机落子
     int block = 32;
     int grid = (roll_times + block - 1) / block;
-    roll_paralell<<<grid, block>>>(device_mat, device_step_nums, device_place,
+    RollParalell<<<grid, block>>>(device_mat, device_step_nums, device_place,
                                   devices_win_times, device_length, player_now,
                                   global_mat_buffer, global_step_buffer);
     CHECK_KERNEL_CALL();
@@ -183,8 +185,8 @@ void rollout_GPU(Node* node,int mat_size,  const int* place, int place_eles, int
 
     // 更新节点
 	{
-		lock_guard lock(mut2);
-		node->update(1, win_count / roll_times);
+		std::lock_guard lock(mut2);
+		node->Update(1, win_count / roll_times);
 	}
 
     // 资源释放

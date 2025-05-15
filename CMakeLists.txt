@@ -13,8 +13,9 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 list(APPEND CMAKE_AUTOUIC_SEARCH_PATHS "${PROJECT_SOURCE_DIR}/ui")
 
-# 环境依赖
+# 环境依赖设置
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+set(CMAKE_CUDA_ARCHITECTURES "86")
 find_package(CUDAToolkit REQUIRED)
 
 # 文件检索
@@ -23,11 +24,11 @@ file(GLOB INC "${PROJECT_SOURCE_DIR}/include/*.h")
 message("${INC}")
 
 # 编译动态链接库
-file(GLOB CUSRC "${PROJECT_SOURCE_DIR}/cuda/*")
-add_library(curoll SHARED ${CUSRC})
-target_include_directories(curoll PRIVATE ${PROJECT_SOURCE_DIR}/include)
-target_compile_options(curoll PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--default-stream=per-thread>)
-set_target_properties(curoll PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+file(GLOB CuSRC "${PROJECT_SOURCE_DIR}/cuda/*")
+add_library(CuRoll SHARED ${CuSRC})
+target_include_directories(CuRoll PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_compile_options(CuRoll PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--default-stream=per-thread>)
+set_target_properties(CuRoll PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 # 编译源文件链接动态库
 add_executable(Gomoku ${SRC} ${INC})
@@ -36,5 +37,5 @@ target_link_libraries(
         Gomoku PRIVATE
         Qt6::Core
         Qt6::Widgets
-        curoll
+        CuRoll
 )

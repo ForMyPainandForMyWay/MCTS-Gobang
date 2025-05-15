@@ -9,7 +9,7 @@ public:
     NodeforS<T>* prev;  // 前驱
     NodeforS<T>* next;  // 后继
 
-    NodeforS(T value) : data(value), prev(nullptr), next(nullptr) {};
+    explicit NodeforS(T value) : data(value), prev(nullptr), next(nullptr) {};
     virtual ~NodeforS() {};
 };
 
@@ -18,75 +18,75 @@ public:
 template <typename T>
 class Stack_M {
 public:
-    NodeforS<T>* head;  // 头节点为栈底
-    NodeforS<T>* tail;  // 尾结点为栈顶
-    int size_;
+    NodeforS<T>* Head;  // 头节点为栈底
+    NodeforS<T>* Tail;  // 尾结点为栈顶
+    int Size;
 
-    Stack_M() : head(nullptr), tail(nullptr), size_(0) {}
+    Stack_M() : Head(nullptr), Tail(nullptr), Size(0) {}
 
     ~Stack_M() {
         this->deleteAllNodes();
     }
 
     // 压栈函数
-    void push_back(T value) {
-        NodeforS<T>* newNode = new NodeforS<T>(value);
-        if (tail == nullptr) {
-            this->head = this->tail = newNode;
+    void PushBack(T value) {
+        auto* newNode = new NodeforS<T>(value);
+        if (Tail == nullptr) {
+            this->Head = this->Tail = newNode;
         }
         else {
-            newNode->prev = tail;
-            this->tail->next = newNode;
-            this->tail = newNode;
+            newNode->prev = Tail;
+            this->Tail->next = newNode;
+            this->Tail = newNode;
         }
-        this->size_++;
+        ++this->Size;
     }
 
     // 出栈函数
-    void pop_back() {
-        if (this->tail == nullptr) {
-            //std::cerr << "Stack is empty, cannot pop." << std::endl;
+    void PopBack() {
+        if (this->Tail == nullptr) {
+            //std::cerr << "Stack is Empty, cannot pop." << std::endl;
             return;
         }
-        NodeforS<T>* temp = this->tail;
-        if (this->head == this->tail) {
-            this->head = this->tail = nullptr;
+        const NodeforS<T>* temp = this->Tail;
+        if (this->Head == this->Tail) {
+            this->Head = this->Tail = nullptr;
         }
         else {
-            this->tail = this->tail->prev;
-            this->tail->next = nullptr;
+            this->Tail = this->Tail->prev;
+            this->Tail->next = nullptr;
         }
         delete temp;
-        this->size_--;
+        --this->Size;
     }
-    
+
     // 返回栈顶数据
-    T back() {
-        if (this->tail == nullptr) {
-            //throw std::runtime_error("Stack is empty.");
+    T Back() {
+        if (this->Tail == nullptr) {
+            //throw std::runtime_error("Stack is Empty.");
         }
-        return this->tail->data;
+        return this->Tail->data;
     }
 
     // 判空
-    bool empty() {
-        return this->size_ == 0;
+    bool Empty() {
+        return this->Size == 0;
     }
 
     // 获取大小
-    int size() const
+    [[nodiscard]] int size() const
     {
-        return this->size_;
+        return this->Size;
     }
 
     // 清空
-    void clear() {
+    void Clear() {
         deleteAllNodes();
     }
 
     // 获取index位置处的数据
     T at(const int index) {
-        if (index >= size_) {
+        if (index >= Size) {
             return 0;
         }
         NodeforS<T>* node = this->getNodeAt(index);
@@ -96,10 +96,10 @@ public:
 private:
     // 辅助函数，用于遍历到index位置并获取该位置结点
     NodeforS<T>* getNodeAt(const int index) {
-        if (index >= size_) {
+        if (index >= Size) {
             //throw std::out_of_range("Index out of range");
         }
-        NodeforS<T>* current = head;
+        NodeforS<T>* current = Head;
         for (int i = 0; i < index; ++i) {
             if (current == nullptr) {
                 //throw std::out_of_range("Index out of range");
@@ -111,14 +111,14 @@ private:
 
     // 辅助函数，用于删除所有结点
     void deleteAllNodes() {
-        NodeforS<T>* current = head;
+        NodeforS<T>* current = Head;
         while (current != nullptr) {
-            NodeforS<T>* temp = current;
+            const NodeforS<T>* temp = current;
             current = current->next;
             delete temp;
         }
-        this->head = this->tail = nullptr;
-        this->size_ = 0;
+        this->Head = this->Tail = nullptr;
+        this->Size = 0;
     }
 };
 
